@@ -10,9 +10,9 @@ interface MoviesRepo {
 
     fun getFavorites() : Flow<MutableList<Favorite>>
 
-    suspend fun deleteRecord(favorite: Favorite) : Int
+    suspend fun deleteRecord(favorite: Favorite)
 
-    suspend fun isRowIsExist(id : Int) : Boolean
+    fun isRowIsExist(id : Int) : Flow<Boolean>
 
     suspend fun upsert(favorite: Favorite): Long
 

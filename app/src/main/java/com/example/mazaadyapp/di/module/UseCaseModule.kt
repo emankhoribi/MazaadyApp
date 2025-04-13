@@ -3,6 +3,7 @@ package com.example.mazaadyapp.di.module
 import com.example.domain.repo.MovieDetailsRepo
 import com.example.domain.repo.MoviesRepo
 import com.example.domain.usecase.MovieDetailsUseCase
+import com.example.domain.usecase.MoviesLocalUseCase
 import com.example.domain.usecase.MoviesUseCase
 import dagger.Module
 import dagger.Provides
@@ -21,4 +22,8 @@ object UseCaseModule {
     @Provides
     fun provideMovieDetailsUseCase(movieDetailsRepo: MovieDetailsRepo) : MovieDetailsUseCase =
         MovieDetailsUseCase(movieDetailsRepo)
+
+    @Provides
+    fun provideMoviesLocalUseCase(moviesRepo: MoviesRepo) : MoviesLocalUseCase =
+        MoviesLocalUseCase(moviesRepo)
 }

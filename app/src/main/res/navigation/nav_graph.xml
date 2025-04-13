@@ -9,16 +9,20 @@
         android:id="@+id/moviesListFragment"
         android:name="com.example.mazaadyapp.ui.movies.MoviesListFragment"
         android:label="fragment_movies_list"
-        tools:layout="@layout/fragment_movies_list" >
+        tools:layout="@layout/fragment_movies_list">
         <action
             android:id="@+id/action_moviesListFragment_to_movieDetailsFragment"
-            app:destination="@id/movieDetailsFragment" />
+            app:destination="@id/movieDetailsFragment"
+            app:popUpTo="@+id/movieDetailsFragment"
+            app:popUpToInclusive="true"
+            app:popUpToSaveState="true"
+            app:restoreState="true" />
     </fragment>
     <fragment
         android:id="@+id/movieDetailsFragment"
         android:name="com.example.mazaadyapp.ui.moviedetails.MovieDetailsFragment"
         android:label="fragment_movie_details"
-        tools:layout="@layout/fragment_movie_details" >
+        tools:layout="@layout/fragment_movie_details">
         <argument
             android:name="id"
             app:argType="integer" />

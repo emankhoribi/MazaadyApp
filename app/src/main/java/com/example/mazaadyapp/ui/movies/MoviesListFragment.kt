@@ -23,14 +23,20 @@ class MoviesListFragment : Fragment(), MovieListAdapter.RecyclerViewEvent {
 
     private val viewModel: MoviesListViewModel by viewModels()
     private lateinit var binding: FragmentMoviesListBinding
+    private var mRootView: ViewGroup? = null
     private val movieListAdapter = MovieListAdapter(this, MovieListAdapter.ViewType.TYPE_LIST)
 
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        getMovieList()
+    }
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding = FragmentMoviesListBinding.inflate(inflater, container, false)
+
+            binding = FragmentMoviesListBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -39,7 +45,15 @@ class MoviesListFragment : Fragment(), MovieListAdapter.RecyclerViewEvent {
         binding.moviesRv.layoutManager = LinearLayoutManager(requireContext())
         binding.moviesRv.adapter = movieListAdapter
 
-        getMovieList()
+
+        viewModel.getFavorites()
+        lifecycleScope.launch {
+            viewModel.moviesLocalFlow.collect {
+                movieListAdapter.setFavorites(it)
+
+            }
+        }
+
         binding.listRg.setOnCheckedChangeListener { radioGroup, i ->
             val radioButton: View = radioGroup.findViewById(i)
             val index = radioGroup.indexOfChild(radioButton)
@@ -75,24 +89,39 @@ class MoviesListFragment : Fragment(), MovieListAdapter.RecyclerViewEvent {
 
     }
 
+
     private fun getMovieList() {
         lifecycleScope.launch {
             viewModel.getMovieList().collectLatest {
                 movieListAdapter.submitData(it)
             }
+
         }
+
     }
 
     override fun onItemClick(movie: Result) {
 
         val directions =
-             MoviesListFragmentDirections.actionMoviesListFragmentToMovieDetailsFragment(
+            MoviesListFragmentDirections.actionMoviesListFragmentToMovieDetailsFragment(
                 movie.id
             )
         findNavController().navigate(directions)
     }
 
-    override fun onItemChecked(movie: Result) {
+    override fun onItemChecked(movie: Result, isChecked: Boolean) {
+        lifecycleScope.launch {
+            if (isChecked) {
+                launch {
+                    viewModel.upsertFavorite(movie)
+                }
+            } else {
+                launch {
+                    viewModel.deleteRecord(movie)
+                }
+            }
+
+        }
 
     }
 

@@ -7,6 +7,7 @@ import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
+import com.example.domain.entity.data.Favorite
 import com.example.domain.entity.movies.Result
 import com.example.mazaadyapp.databinding.ItemMovieBinding
 import com.example.mazaadyapp.databinding.ItemMovieGridBinding
@@ -20,8 +21,9 @@ class MovieListAdapter(
     PagingDataAdapter<Result, MovieListAdapter.ViewHolder>(Diffcallback()) {
 
     private lateinit var itemBinding: ViewBinding
+    private var favoriteList = mutableListOf<Favorite>()
 
-    public  enum class ViewType {
+    public enum class ViewType {
         TYPE_GRID, TYPE_LIST
     }
 
@@ -40,52 +42,88 @@ class MovieListAdapter(
         return ViewHolder(itemBinding)
     }
 
-    fun setItemType (type: ViewType){
+    fun setItemType(type: ViewType) {
         this.currentViewType = type
         notifyDataSetChanged()
     }
+
     override fun getItemViewType(position: Int): Int {
         return currentViewType.ordinal
+    }
+
+    fun setFavorites(moviesLocalFlow: MutableList<Favorite>?) {
+        if (moviesLocalFlow != null) {
+            favoriteList = moviesLocalFlow
+            notifyItemRangeChanged(0, itemCount)
+        }
     }
 
     inner class ViewHolder(private val itemBinding: ViewBinding) :
         RecyclerView.ViewHolder(itemBinding.root),
         View.OnClickListener {
-        fun bind(movie: Result){
-            when(currentViewType){
+        fun bind(movie: Result) {
+            when (currentViewType) {
                 ViewType.TYPE_LIST -> listBind(movie)
                 ViewType.TYPE_GRID -> gridBind(movie)
             }
         }
-        private fun listBind(movie: Result) {
 
+        private fun listBind(movie: Result) {
+            var isExist = false
             val listBinding = itemBinding as ItemMovieBinding
             listBinding.titleTv.text = movie.title
-            Picasso.get().load(Constants.IMAGE_BASE.plus(movie.poster_path)).into(listBinding.movieIv)
+            Picasso.get().load(Constants.IMAGE_BASE.plus(movie.poster_path))
+                .into(listBinding.movieIv)
             listBinding.releaseDateTv.text = movie.release_date
-            listBinding.checkbox.setOnClickListener(this)
+            listBinding.checkbox.setOnCheckedChangeListener { buttonView, isChecked ->
+
+                listener.onItemChecked(movie, isChecked)
+
+            }
+            for (favorite in favoriteList) {
+                if (movie.id == favorite.id) {
+                    isExist = true
+                }
+            }
+
+            if (isExist) {
+                listBinding.checkbox.isChecked = true
+            } else
+                listBinding.checkbox.isChecked = false
         }
 
-        private fun gridBind(movie: Result){
+        private fun gridBind(movie: Result) {
+            var isExist = false
             val gridBinding = itemBinding as ItemMovieGridBinding
             gridBinding.titleTv.text = movie.title
-            Picasso.get().load(Constants.IMAGE_BASE.plus(movie.poster_path)).into(gridBinding.movieIv)
+            Picasso.get().load(Constants.IMAGE_BASE.plus(movie.poster_path))
+                .into(gridBinding.movieIv)
             gridBinding.releaseDateTv.text = movie.release_date
+            gridBinding.checkbox.setOnCheckedChangeListener { buttonView, isChecked ->
+
+                listener.onItemChecked(movie, isChecked)
+
+            }
+            for (favorite in favoriteList) {
+                if (movie.id == favorite.id) {
+                    isExist = true
+                }
+            }
+
+            if (isExist) {
+                gridBinding.checkbox.isChecked = true
+            } else
+                gridBinding.checkbox.isChecked = false
 
         }
 
         override fun onClick(v: View?) {
-            if(v == itemBinding.root) {
-                val position = absoluteAdapterPosition
-                if (position != RecyclerView.NO_POSITION) {
-                    getItem(position)?.let { listener.onItemClick(it) }
-                }
-            }else{
-                val position = absoluteAdapterPosition
-                if (position != RecyclerView.NO_POSITION) {
-                    getItem(position)?.let { listener.onItemChecked(it) }
-                }
+
+            val position = absoluteAdapterPosition
+            if (position != RecyclerView.NO_POSITION) {
+                getItem(position)?.let { listener.onItemClick(it) }
             }
+
         }
 
         init {
@@ -96,7 +134,7 @@ class MovieListAdapter(
 
     interface RecyclerViewEvent {
         fun onItemClick(movie: Result)
-        fun onItemChecked(movie: Result)
+        fun onItemChecked(movie: Result, isChecked: Boolean)
 
     }
 

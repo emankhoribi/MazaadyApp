@@ -22,9 +22,9 @@ interface FavoriteDao {
     fun getFavorites(): Flow<MutableList<Favorite>>
 
     @Query("SELECT EXISTS(SELECT * FROM favorite WHERE id = :id)")
-    fun isRowIsExist(id : Int) : Boolean
+    fun isRowIsExist(id : Int) : Flow<Boolean>
 
 
     @Delete
-    suspend fun deleteRecord(favorite: Favorite): Int
+    suspend fun deleteRecord(favorite: Favorite)
 }

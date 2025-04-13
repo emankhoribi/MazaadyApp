@@ -12,9 +12,9 @@ class MoviesRepoImpl(private val apiServices: ApiServices, private val db: Movie
 
     override fun getFavorites(): Flow<MutableList<Favorite>> = db.FavoriteDao().getFavorites()
 
-    override suspend fun deleteRecord(favorite: Favorite): Int = db.FavoriteDao().deleteRecord(favorite)
+    override suspend fun deleteRecord(favorite: Favorite) = db.FavoriteDao().deleteRecord(favorite)
 
-    override suspend fun isRowIsExist(id: Int): Boolean = db.FavoriteDao().isRowIsExist(id)
+    override fun isRowIsExist(id: Int): Flow<Boolean> = db.FavoriteDao().isRowIsExist(id)
 
     override suspend fun upsert(favorite: Favorite): Long = db.FavoriteDao().upsert(favorite)
 
