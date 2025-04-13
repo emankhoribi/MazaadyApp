@@ -1,6 +1,6 @@
 package com.example.domain.entity.movies
 
-data class MoviesResult(
+data class Result(
     val adult: Boolean,
     val backdrop_path: String,
     val genre_ids: List<Int>,
