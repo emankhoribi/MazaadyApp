@@ -4,10 +4,12 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import androidx.paging.LoadState
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.domain.entity.movies.Result
@@ -15,6 +17,7 @@ import com.example.mazaadyapp.databinding.FragmentMoviesListBinding
 import com.example.mazaadyapp.ui.movies.adapter.MovieListAdapter
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.launch
 
 
@@ -51,6 +54,22 @@ class MoviesListFragment : Fragment(), MovieListAdapter.RecyclerViewEvent {
             viewModel.moviesLocalFlow.collect {
                 movieListAdapter.setFavorites(it)
 
+            }
+        }
+
+        lifecycleScope.launch {
+            movieListAdapter.loadStateFlow.distinctUntilChangedBy {
+                it.refresh
+            }.collect{
+                if( it.refresh is LoadState.Loading){
+                    binding.progressBar.visibility = View.VISIBLE
+                }else{
+                    binding.progressBar.visibility = View.GONE
+                    if (it.refresh is LoadState.Error){
+                        Toast.makeText(requireContext(), (it.refresh as LoadState.Error).error.message, Toast.LENGTH_SHORT)
+                            .show()
+                    }
+                }
             }
         }
 
